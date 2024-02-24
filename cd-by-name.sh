@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# This script changes into a child directory based on just the name of the directory
+# and no path provided
+
+# Getting the name of the directory into which I want to cd
+DIRECTORY_NAME="${1}"
+
+# Throwing error if no directory name has been provided
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <DIRECTORY_NAME>"
+    exit 1
+fi
+
+# Finding all directories with the name ${DIRECTORY_NAME}
+DIRECTORIES_LIST=$(find . -type d -name "${DIRECTORY_NAME}" | sort | uniq)
+
+# echo "${DIRECTORIES_LIST}"
+
+# Choosing between different directories with the same name
+
+# Setting the separator to only newline (for leaving out space and tab)
+IFS=$'\n'
+
+# Reading all the directory names into an array
+read -r -d '' -a DIRECTORY_NAME_ARRAY <<< "${DIRECTORIES_LIST}"
+
+# Selecting between different directories of the same name
+select DIRECTORY in "${DIRECTORY_NAME_ARRAY[@]}"; do
+    if [[ "${REPLY}" =~ ^[0-9]+$ ]] && \
+        [[ "${REPLY}" -ge 1 ]] && \
+        [[ "${REPLY}" -le "${#DIRECTORY_NAME_ARRAY[@]}" ]]; then
+        cd "$(realpath ${DIRECTORY})"
+        break
+    else
+        echo "Invalid option...try another one"
+    fi
+done
